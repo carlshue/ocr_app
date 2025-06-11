@@ -40,7 +40,7 @@ class _OCRHomePageState extends State<OCRHomePage> {
   List<Map<String, dynamic>> debugWords = []; // 🔥 Datos de depuración visual
 
   // URL de tu API (ajusta según convenga)
-  final String apiUrl = "http://10.0.2.2:8080/ocr-json";
+  final String apiUrl = "https://ocrticketing-production.up.railway.app/ocr-json";
 
 bool _isProcessing = false;
 Future<void> _pickAndRecognizeText() async {
