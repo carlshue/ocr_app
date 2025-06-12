@@ -1,7 +1,7 @@
 // 🔥 Importaciones necesarias
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'dart:io';
 import 'dart:math';
 import 'package:collection/collection.dart';
@@ -47,9 +47,9 @@ class _OCRHomePageState extends State<OCRHomePage> {
       });
 
       final inputImage = InputImage.fromFile(selectedImage!);
-      final textDetector = GoogleMlKit.vision.textRecognizer();
-      final RecognizedText recognizedText = await textDetector.processImage(inputImage);
-      await textDetector.close();
+      final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+      final recognizedText = await textRecognizer.processImage(inputImage);
+      await textRecognizer.close();
 
       List<Map<String, dynamic>> wordData = [];
       for (TextBlock block in recognizedText.blocks) {

@@ -3,14 +3,19 @@
 *.log
 *.pyc
 *.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
+*.DS_Store
+*.atom/
+*.build/
+*.buildlog/
+*.history
+*.svn/
+*.swiftpm/
+*.html
+*.java
 migrate_working_dir/
+.gitignore
+Run
+*/opencv/*
 
 # IntelliJ related
 *.iml
