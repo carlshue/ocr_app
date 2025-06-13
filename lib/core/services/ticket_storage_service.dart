@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/ticket.dart';
-
+import 'package:image_picker/image_picker.dart';
 class TicketStorageService {
   static const _key = 'scanned_tickets';
 
@@ -39,4 +39,7 @@ class TicketStorageService {
       await prefs.setString(_key, encoded);
     }
   }
+
+
+
 }

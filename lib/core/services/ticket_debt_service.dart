@@ -38,3 +38,6 @@ saldoFinal.forEach((k, v) => print("$k saldo $v"));
 
   return saldoFinal; // positivo = le deben, negativo = debe
 }
+
+
+

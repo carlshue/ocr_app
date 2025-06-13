@@ -49,6 +49,31 @@ class _ScannedTicketsPageState extends State<ScannedTicketsPage>
           const Center(child: Text('🗺️ Aquí irá el mapa con ubicaciones.')),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        icon: const Icon(Icons.add),
+        label: const Text("nuevo ticket"),
+        onPressed: () async {
+          final newTicket = Ticket(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            title: "Ticket nuevo",
+            scannedAt: DateTime.now(),
+            content: '',
+          );
+
+          await TicketStorageService.saveTicket(newTicket);
+
+          final updated = await Navigator.push<bool>(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WorkbenchPage(ticket: newTicket),
+            ),
+          );
+
+          if (updated == true) {
+            _loadTickets();
+          }
+        },
+      ),
     );
   }
 

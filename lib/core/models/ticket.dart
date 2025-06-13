@@ -3,9 +3,9 @@ import 'cuenta.dart'; // Asegúrate de que esta importación sea correcta
 class Ticket {
   final String id;
   final String title;
-  final String content;
+  String content;
   final DateTime scannedAt;
-  final String? imagePath; // Nueva propiedad opcional
+  String? imagePath; // Nueva propiedad opcional
   Cuenta? cuenta; 
 
   Ticket({
