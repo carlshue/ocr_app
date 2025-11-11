@@ -25,6 +25,8 @@ class OCRApp extends StatelessWidget {
 }
 
 class OCRHomePage extends StatefulWidget {
+  const OCRHomePage({super.key});
+
   @override
   State<OCRHomePage> createState() => _OCRHomePageState();
 }

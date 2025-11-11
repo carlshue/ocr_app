@@ -7,6 +7,7 @@ import '../../core/services/ticket_debt_service.dart';
 class CalculadoraCuentaWidget extends StatefulWidget {
   final List<List<String>> tabla;
   final void Function(Cuenta cuenta)? onCuentaFinalizada;
+
   const CalculadoraCuentaWidget({
     super.key,
     required this.tabla,
@@ -15,22 +16,30 @@ class CalculadoraCuentaWidget extends StatefulWidget {
   @override
   State<CalculadoraCuentaWidget> createState() => _CalculadoraCuentaWidgetState();
 }
+
 class _CalculadoraCuentaWidgetState extends State<CalculadoraCuentaWidget> {
+  final _precioRegex = RegExp(r'^\d+(\.\d{1,2})?$');
+  
   int paso = 0;
   int? columnaArticulo;
   int? columnaPrecio;
   List<List<String>> tablaEditable = [];
+  List<TextEditingController> articuloControllers = [];
+  List<TextEditingController> precioControllers = [];
+  List<bool> erroresPrecio = [];
+  
   List<Persona> personas = [];
   Map<String, Set<int>> consumosPorPersona = {};
   List<Pago> pagos = [];
   String? pagadorSeleccionado;
   double? cantidadPagada;
   int personaActualIndex = 0;
+
   @override
   void initState() {
     super.initState();
     tablaEditable = List<List<String>>.from(widget.tabla);
-    detectarColumnasArticuloYPrecio(); 
+    detectarColumnasArticuloYPrecio();
   }
 
 void detectarColumnasArticuloYPrecio() {
@@ -154,8 +163,9 @@ Row(
                             final isPrecio = columnaPrecio == colIndex;
                             final cellText = (colIndex < row.length) ? row[colIndex] : "";
                             Color bgColor = fondoNormal;
-                            if (isArticulo) bgColor = fondoArticulo;
-                            else if (isPrecio) bgColor = fondoPrecio;
+                            if (isArticulo) {
+                              bgColor = fondoArticulo;
+                            } else if (isPrecio) bgColor = fondoPrecio;
                             return AnimatedContainer(
                               duration: const Duration(milliseconds: 250),
                               curve: Curves.easeInOut,
@@ -226,101 +236,164 @@ Row(
     );
   }
 
-  final _precioRegex = RegExp(r'^\d+([.,]\d{2})?$');
+
   Widget _buildPasoEditarTabla() {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    return Column(
-      children: [
-        const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Text(
-            "Edita los artículos y precios:",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: tablaEditable.length,
-            itemBuilder: (context, i) {
-              final articuloController = TextEditingController(text: tablaEditable[i][columnaArticulo!]);
-              final precioController = TextEditingController(text: tablaEditable[i][columnaPrecio!]);
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                elevation: isDark ? 0 : 2,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                color: isDark ? Colors.grey[900] : Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: TextField(
-                          controller: articuloController,
-                          onChanged: (val) => tablaEditable[i][columnaArticulo!] = val,
-                          decoration: const InputDecoration(labelText: "Artículo"),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        flex: 1,
-                        child: TextField(
-                          controller: precioController,
-                          keyboardType: TextInputType.numberWithOptions(decimal: true),
-                          onChanged: (val) => tablaEditable[i][columnaPrecio!] = val,
-                          decoration: const InputDecoration(labelText: "Precio"),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => setState(() => tablaEditable.removeAt(i)),
-                      )
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              ElevatedButton.icon(
-                icon: const Icon(Icons.add),
-                label: const Text("Añadir fila"),
-                onPressed: () {
-                  setState(() {
-                    tablaEditable.add(["", ""]);
-                  });
-                },
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: () {
-                  final allValid = tablaEditable.every((row) =>
-                      row.length > columnaPrecio! &&
-                      _precioRegex.hasMatch(row[columnaPrecio!].trim()));
-                  if (!allValid) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Los precios no tienen formato correcto"),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
-                  setState(() => paso++);
-                },
-                child: const Text("Siguiente"),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
+
+  // Inicialización de controladores y errores
+  while (articuloControllers.length < tablaEditable.length) {
+    articuloControllers.add(TextEditingController(
+        text: tablaEditable[articuloControllers.length][columnaArticulo!]));
   }
+  while (precioControllers.length < tablaEditable.length) {
+    String raw = tablaEditable[precioControllers.length][columnaPrecio!]
+        .replaceAll(RegExp(r'[^\d,.-]'), '')
+        .replaceAll(',', '.');
+    precioControllers.add(TextEditingController(text: raw));
+    tablaEditable[precioControllers.length - 1][columnaPrecio!] = raw;
+  }
+  while (erroresPrecio.length < tablaEditable.length) {
+    erroresPrecio.add(false);
+  }
+
+  return Column(
+    children: [
+      const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Text(
+          "Edita los artículos y precios:",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
+      Expanded(
+        child: ListView.builder(
+          itemCount: tablaEditable.length,
+          itemBuilder: (context, i) {
+            final articuloController = articuloControllers[i];
+            final precioController = precioControllers[i];
+
+            return Card(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              elevation: isDark ? 0 : 2,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              color: isDark ? Colors.grey[900] : Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: TextField(
+                        controller: articuloController,
+                        onChanged: (val) =>
+                            tablaEditable[i][columnaArticulo!] = val,
+                        decoration:
+                            const InputDecoration(labelText: "Artículo"),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 1,
+                      child: TextField(
+                        controller: precioController,
+                        keyboardType:
+                            const TextInputType.numberWithOptions(decimal: true),
+                        onChanged: (val) {
+                          String clean = val
+                              .replaceAll(RegExp(r'[^\d,.-]'), '')
+                              .replaceAll(',', '.');
+
+                          if (clean != val) {
+                            Future.microtask(() {
+                              precioController.text = clean;
+                              precioController.selection =
+                                  TextSelection.fromPosition(
+                                      TextPosition(offset: clean.length));
+                            });
+                          }
+
+                          tablaEditable[i][columnaPrecio!] = clean;
+
+                          setState(() {
+                            erroresPrecio[i] =
+                                !_precioRegex.hasMatch(clean.trim());
+                          });
+                        },
+                        decoration: InputDecoration(
+                          labelText: "Precio",
+                          errorText: erroresPrecio[i]
+                              ? 'Formato inválido'
+                              : null,
+                          border: const OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => setState(() {
+                        tablaEditable.removeAt(i);
+                        articuloControllers.removeAt(i);
+                        precioControllers.removeAt(i);
+                        erroresPrecio.removeAt(i);
+                      }),
+                    )
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            ElevatedButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text("Añadir fila"),
+              onPressed: () => setState(() {
+                tablaEditable.add(["", ""]);
+                articuloControllers.add(TextEditingController());
+                precioControllers.add(TextEditingController());
+                erroresPrecio.add(false);
+              }),
+            ),
+            const Spacer(),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  for (int i = 0; i < tablaEditable.length; i++) {
+                    final clean =
+                        tablaEditable[i][columnaPrecio!].trim();
+                    erroresPrecio[i] = !_precioRegex.hasMatch(clean);
+                  }
+                });
+
+                final allValid = erroresPrecio.every((e) => !e);
+
+                if (!allValid) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content:
+                          Text("Los precios no tienen formato correcto"),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                setState(() => paso++);
+              },
+              child: const Text("Siguiente"),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
 
 
 Widget _buildPasoComensales() {
@@ -621,7 +694,7 @@ Widget _buildPasoResultado() {
     orElse: () => Persona(nombre: pagadorSeleccionado!),
   );
   List<Persona> personasFinal = List.from(personas);
-  if (!personasFinal.any((p) => p.nombre.toLowerCase() == pagadorPersona!.nombre.toLowerCase())) {
+  if (!personasFinal.any((p) => p.nombre.toLowerCase() == pagadorPersona.nombre.toLowerCase())) {
     personasFinal.add(pagadorPersona);
   }
   

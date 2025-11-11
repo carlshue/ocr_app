@@ -4,7 +4,6 @@ import '../../core/models/ticket.dart';
 import '../../core/services/ticket_storage_service.dart';
 import 'debt_calculator.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../core/services/ticket_debt_service.dart';
 
 class WorkbenchPage extends StatefulWidget {
   final Ticket ticket;
@@ -205,137 +204,26 @@ class _WorkbenchPageState extends State<WorkbenchPage> {
       );
 
 
-case 2:
-  final cuenta = widget.ticket.cuenta;
 
-  if (cuenta != null) {
-    final pagador = cuenta.pagos.isNotEmpty ? cuenta.pagos.first.pagador : null;
-    final total = cuenta.pagos.isNotEmpty ? cuenta.pagos.first.cantidad : 0.0;
-    final deudas = calcularDeudas(cuenta);
+      case 2:
+        final rows = widget.ticket.content
+            .split('\n')
+            .map((line) => line.split('|').map((e) => e.trim()).toList())
+            .toList();
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Resumen de la cuenta",
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          Text("Pagador: $pagador"),
-          Text("Total pagado: \$${total.toStringAsFixed(2)}"),
-          const SizedBox(height: 16),
-          Text(
-            "Deudas:",
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          ...cuenta.personas.where((p) => p.nombre != pagador).map((persona) {
-            final deuda = deudas[persona.nombre] ?? 0.0;
-            final estaPagado = deuda <= 0;
+        return CalculadoraCuentaWidget(
+          tabla: rows,
+          onCuentaFinalizada: (cuenta) async {
+            setState(() {
+              widget.ticket.cuenta = cuenta;
+            });
 
-            return Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: ListTile(
-                leading: Icon(
-                  estaPagado ? Icons.check_circle : Icons.money_off_csred,
-                  color: estaPagado ? Colors.green : Colors.redAccent,
-                ),
-                title: Text(persona.nombre),
-                trailing: Text(
-                  estaPagado ? "Pagado" : "\$${deuda.toStringAsFixed(2)}",
-                  style: TextStyle(
-                    color: estaPagado ? Colors.green : Colors.redAccent,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+            await TicketStorageService.updateTicket(widget.ticket);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Cuenta actualizada correctamente.")),
             );
-          }).toList(),
-          const SizedBox(height: 24),
-          // Reemplazamos Center por Column con align center
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ElevatedButton.icon(
-                icon: const Icon(Icons.edit),
-                label: const Text("Cambiar cuenta"),
-                onPressed: () {
-                  final rows = widget.ticket.content
-                      .split('\n')
-                      .map((line) => line.split('|').map((e) => e.trim()).toList())
-                      .toList();
-
-                  print("rows: que le enviamos al calculadora cuenta \n -------- $rows  ----\n");
-
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => CalculadoraCuentaWidget(
-                        tabla: rows,
-                        onCuentaFinalizada: (nuevaCuenta) async {
-                          setState(() {
-                            widget.ticket.cuenta = nuevaCuenta;
-                          });
-                          await TicketStorageService.updateTicket(widget.ticket);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Cuenta actualizada correctamente.")),
-                          );
-                          Navigator.of(context).pop(); // Volver al resumen
-                        },
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  } else {
-    // Igual quitamos el Center y usamos Column para alinear el botón
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton.icon(
-            icon: const Icon(Icons.calculate),
-            label: const Text("Crear cuenta nueva"),
-            onPressed: () {
-              final rows = widget.ticket.content
-                  .split('\n')
-                  .map((line) => line.split('|').map((e) => e.trim()).toList())
-                  .toList();
-
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => CalculadoraCuentaWidget(
-                    tabla: rows,
-                    onCuentaFinalizada: (cuenta) async {
-                      setState(() {
-                        widget.ticket.cuenta = cuenta;
-                      });
-                      await TicketStorageService.updateTicket(widget.ticket);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Cuenta creada correctamente.")),
-                      );
-                      Navigator.of(context).pop(); // Volver al resumen
-                    },
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-
-
+          },
+        );
 
       default:
         return const SizedBox.shrink();
