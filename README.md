@@ -21,91 +21,72 @@ This Flutter app allows users to capture or select ticket images, preprocess the
 ## 🔄 User Flow
 
 ```mermaid
-flowchart TD
+flowchart LR
     A["Flutter App / User"] --> B["Select or capture ticket image"]
     B --> C["Preprocess image (grayscale, binarization, skewing...)"]
     C --> D["Upload image to OCR Server (Railway)"]
-    D --> E["Receive structured data (JSON)"]
-    E --> F["Edit or correct OCR results"]
-    F --> G["Assign costs to friends and calculate totals"]
+
+    E["Receive structured data (JSON) from server"] --> F["User may edit or correct OCR results"]
+    F --> G["When user assigns costs to friends calculate totals"]
     G --> H["Save ticket and calculations locally"]
 
     click D "https://github.com/carlshue/ocr_ticketing" "Go to GitHub repo"
 ```
 ## ⚙️ How It Works
-1️⃣ Select Image
 
-Users can choose or capture an image of a ticket or bill using the image_picker plugin.
+### 1️⃣ Select Image
+Users can choose or capture an image of a ticket or bill using the `image_picker` plugin.
 
-🖼️ Placeholder for sample image:
-![Select Image Example](docs/images/select_image_placeholder.png)
+![Select Ticket Example](docs/images/1select_ticket_example2.png)
 
-2️⃣ Preprocess Image
+---
 
-Images are optimized for OCR:
+### 2️⃣ View Ticket Information
+After OCR, users see the extracted ticket information in a clean table view.
 
-Convert to grayscale
+![View Ticket Info](docs/images/3_view_ticket_info.png)
 
-Apply binarization (threshold: 128)
+---
 
-Save preprocessed image temporarily
+### 3️⃣ Edit & Modify Ticket
+Users can correct misread items, add missing prices, or update other ticket details.
 
-🖼️ Placeholder for before/after preprocessing:
-![Preprocessing Example](docs/images/preprocess_before_after.png)
+![Modify Ticket Info](docs/images/4_modify_ticket_info.png)
 
-3️⃣ Upload to OCR Server
+---
 
-The app sends the image to a remote server (e.g., hosted on Railway) using http.MultipartRequest.
+### 4️⃣ Choose People Who Consumed Items
+Assign each item on the ticket to the friends who consumed it.
 
-🖼️ Placeholder for upload screenshot:
-![Upload Example](docs/images/upload_example.png)
+![Choose People](docs/images/5_choose_names_of_people_who_consumed_somthing.png)
 
-4️⃣ Receive OCR Response
+---
 
-The server returns a JSON with fields like:
+### 5️⃣ Choose Payer of the Bill
+Select which friend paid the bill or split payment.
 
-Key	Description
-original_texts	Raw OCR-detected text
-cleaned_texts	Text after normalization
-confidences	OCR confidence per segment
-bboxes	Text bounding boxes
+![Choose Payer](docs/images/6_choose_payer_of_the_bill.png)
 
-🖼️ Placeholder for OCR JSON output:
-![OCR JSON Example](docs/images/json_response_example.png)
+---
 
-5️⃣ Edit & Organize Ticket Data
+### 6️⃣ Assign Items to Each Person
+Determine who consumed which items to calculate individual totals.
 
-Users can:
+![Assign Items](docs/images/7_choose_which_items_every_person_consumed.png)
 
-Edit extracted text (correct misread items, add missing prices).
+---
 
-Categorize entries (e.g., Food, Drinks, Tips).
+### 7️⃣ Calculation Results
+The app automatically calculates totals for each person based on consumption.
 
-Add notes or tags (e.g., “Dinner with friends”).
+![Calculation Results](docs/images/8_calculations_results.png)
 
-🖼️ Placeholder for editable table view:
-![Editable Results Example](docs/images/editable_table_example.png)
+---
 
-6️⃣ Split the Bill 💸
+### 8️⃣ Save Locally
+All tickets (with edits and calculations) are stored securely on the device. Users can reopen them anytime, even offline.
 
-Turn your tickets into quick group expense trackers:
-
-Assign each item or total to one or more friends.
-
-Automatically calculate who owes how much.
-
-Save the breakdown directly inside the ticket record.
-
-🖼️ Placeholder for split view:
-![Split Bill Example](docs/images/split_bill_example.png)
-
-7️⃣ Save Locally
-
-All tickets (with edits and calculations) are stored securely on the device.
-You can reopen them anytime, even offline.
-
-🖼️ Placeholder for ticket history:
-![Saved Tickets Example](docs/images/saved_tickets_example.png)
+![Saved Tickets Example](docs/images/2select_ticket_example2.png)
 
 
 ## 📦 Dependencies
