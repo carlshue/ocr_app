@@ -1,119 +1,138 @@
-# Flutter Ticket OCR App (User Side)
+# 🧾 Flutter Ticket OCR App (User Side)
 
-This Flutter app allows users to capture or select ticket images, preprocess them, and send them to a remote server for OCR (Optical Character Recognition). The processed data is returned as a structured table and displayed within the app.
+This Flutter app allows users to capture or select ticket images, preprocess them, and send them to a remote server for OCR (Optical Character Recognition). The app then lets users view, edit, and save the extracted data — making it easy to manage shared expenses like restaurant bills or event tickets.
 
-## Features
+## ✨ Features
 
-- Capture images from the gallery or camera.
-- Preprocess images (grayscale conversion, binarization).
-- Send images to the server for OCR processing.
-- Receive structured ticket data (JSON) from the server.
-- Display OCR results in a table or raw JSON view.
-- Store ticket locally for future reference.
+📸 Capture or select images from the gallery or camera.
 
-## User Flow
+⚙️ Preprocess images (grayscale, binarization) to improve OCR accuracy.
+
+☁️ Upload to OCR server and receive structured data (JSON).
+
+🧠 Edit extracted information manually to fix OCR errors or add details.
+
+💾 Save tickets locally for future access — even offline.
+
+👥 Split bills easily: assign items or amounts to friends and calculate who owes what.
+
+📊 View all tickets in a clean local history with totals and notes.
+
+## 🔄 User Flow
 
 ```mermaid
 flowchart TD
     A["Flutter App / User"] --> B["Select or capture ticket image"]
-    B --> C["Optional image preprocessing (grayscale & binarization)"]
+    B --> C["Preprocess image (grayscale, binarization, skewing...)"]
     C --> D["Upload image to OCR Server (Railway)"]
-    D --> E["Receive processed data: JSON with texts, bounding boxes, confidences"]
-    E --> F["Display structured table or raw JSON to user"]
-    F --> G["Optionally save ticket locally"]
+    D --> E["Receive structured data (JSON)"]
+    E --> F["Edit or correct OCR results"]
+    F --> G["Assign costs to friends and calculate totals"]
+    G --> H["Save ticket and calculations locally"]
 
     click D "https://github.com/carlshue/ocr_ticketing" "Go to GitHub repo"
-
 ```
-How It Works
-Select Image: Users pick an image from the gallery using the image_picker plugin.
+## ⚙️ How It Works
+1️⃣ Select Image
 
-Preprocess Image:
+Users can choose or capture an image of a ticket or bill using the image_picker plugin.
 
-Convert image to grayscale.
+🖼️ Placeholder for sample image:
+![Select Image Example](docs/images/select_image_placeholder.png)
 
-Binarize image using a threshold (default: 128).
+2️⃣ Preprocess Image
 
-Save preprocessed image temporarily in the app's cache directory.
+Images are optimized for OCR:
 
-Upload Image:
+Convert to grayscale
 
-The image is sent to the server using http.MultipartRequest.
+Apply binarization (threshold: 128)
 
-Both the original and preprocessed image can be uploaded.
+Save preprocessed image temporarily
 
-Receive OCR Response:
+🖼️ Placeholder for before/after preprocessing:
+![Preprocessing Example](docs/images/preprocess_before_after.png)
 
-The server returns a JSON with:
+3️⃣ Upload to OCR Server
 
-original_texts: Raw detected text.
+The app sends the image to a remote server (e.g., hosted on Railway) using http.MultipartRequest.
 
-cleaned_texts: Text after cleaning and normalization.
+🖼️ Placeholder for upload screenshot:
+![Upload Example](docs/images/upload_example.png)
 
-confidences: OCR confidence scores.
+4️⃣ Receive OCR Response
 
-bboxes: Bounding boxes for detected text regions.
+The server returns a JSON with fields like:
 
-Display Results:
+Key	Description
+original_texts	Raw OCR-detected text
+cleaned_texts	Text after normalization
+confidences	OCR confidence per segment
+bboxes	Text bounding boxes
 
-Show a structured table for easy reading.
+🖼️ Placeholder for OCR JSON output:
+![OCR JSON Example](docs/images/json_response_example.png)
 
-Optionally display the raw JSON for debugging.
+5️⃣ Edit & Organize Ticket Data
 
-Save Tickets: Users can store the ticket locally for future reference.
+Users can:
 
-Example Code Snippet (Upload & Display)
-dart
-Copy code
-Future<void> _pickPreprocessAndUploadImage() async {
-  final picker = ImagePicker();
-  final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-  if (pickedFile != null) {
-    final preprocessedFile = await _preprocessImage(File(pickedFile.path));
-    if (preprocessedFile != null) {
-      setState(() {
-        selectedImage = preprocessedFile;
-      });
+Edit extracted text (correct misread items, add missing prices).
 
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse('https://ocrticketing-production.up.railway.app/ocr'),
-      );
-      request.files.add(await http.MultipartFile.fromPath('file', preprocessedFile.path));
+Categorize entries (e.g., Food, Drinks, Tips).
 
-      final streamedResponse = await request.send();
-      final response = await http.Response.fromStream(streamedResponse);
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          originalTexts = data['original_texts'] ?? [];
-          cleanedTexts = data['cleaned_texts'] ?? [];
-          confidences = data['confidences'] ?? [];
-          bboxes = data['bboxes'] ?? [];
-        });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response.statusCode}')),
-        );
-      }
-    }
-  }
-}
-Dependencies
-image_picker: Pick images from the gallery or camera.
+Add notes or tags (e.g., “Dinner with friends”).
 
-http: Upload images and retrieve OCR responses.
+🖼️ Placeholder for editable table view:
+![Editable Results Example](docs/images/editable_table_example.png)
 
-image: Preprocess images (grayscale, binarization).
+6️⃣ Split the Bill 💸
 
-path_provider: Store temporary preprocessed images.
+Turn your tickets into quick group expense trackers:
 
-dart:io & dart:convert: File I/O and JSON parsing.
+Assign each item or total to one or more friends.
 
-Notes
-Image preprocessing improves OCR accuracy by normalizing lighting and removing noise.
+Automatically calculate who owes how much.
 
-Users can switch between table view and raw JSON for debugging.
+Save the breakdown directly inside the ticket record.
 
-The server handles the heavy lifting of OCR and table reconstruction.
+🖼️ Placeholder for split view:
+![Split Bill Example](docs/images/split_bill_example.png)
 
+7️⃣ Save Locally
+
+All tickets (with edits and calculations) are stored securely on the device.
+You can reopen them anytime, even offline.
+
+🖼️ Placeholder for ticket history:
+![Saved Tickets Example](docs/images/saved_tickets_example.png)
+
+
+## 📦 Dependencies
+Package	Purpose
+image_picker	Capture or pick images
+http	Upload images & receive OCR JSON
+image	Image preprocessing
+path_provider	Manage local storage paths
+dart:io, dart:convert	File I/O & JSON parsing
+sqflite / hive	Local ticket storage
+provider / riverpod	State management
+flutter_math / intl	Bill calculations & formatting
+
+## 🗂️ Local Data Storage
+Tickets are stored locally with:
+Processed OCR text and metadata
+Editable fields (title, date, location, etc.)
+Friend-based bill splits
+Notes or tags
+
+
+📝 Notes
+* ![server side](https://github.com/carlshue/ocr_app/tree/main)
+
+
+Preprocessing helps improve OCR accuracy by removing noise and adjusting contrast.
+
+All data (tickets, notes, friends, calculations) remain local and private to the device.
+
+You can expand the app to sync with the cloud or share tickets between users in future versions.
