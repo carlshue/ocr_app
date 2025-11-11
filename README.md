@@ -34,59 +34,20 @@ flowchart LR
 ```
 ## ⚙️ How It Works
 
-### 1️⃣ Select Image
-Users can choose or capture an image of a ticket or bill using the `image_picker` plugin.
+## ⚙️ How It Works
 
-![Select Ticket Example](docs/images/1select_ticket_example2.png)
+| Step | Screenshot | Description |
+|------|------------|-------------|
+| 1️⃣ Select Image | ![Select Image](docs/images/1select_ticket_example2.png) | Users can choose or capture an image of a ticket or bill using the `image_picker` plugin. |
+| 2️⃣ View Ticket Info | ![View Ticket Info](docs/images/3_view_ticket_info.png) | After OCR, users see the extracted ticket information in a clean table view. |
+| 3️⃣ Edit & Modify Ticket | ![Modify Ticket Info](docs/images/4_modify_ticket_info.png) | Users can correct misread items, add missing prices, or update other ticket details. |
+| 4️⃣ Choose People | ![Choose People](docs/images/5_choose_names_of_people_who_consumed_somthing.png) | Assign each item on the ticket to the friends who consumed it. |
+| 5️⃣ Choose Payer | ![Choose Payer](docs/images/6_choose_payer_of_the_bill.png) | Select which friend paid the bill or split payment. |
+| 6️⃣ Assign Items | ![Assign Items](docs/images/7_choose_which_items_every_person_consumed.png) | Determine who consumed which items to calculate individual totals. |
+| 7️⃣ Calculation Results | ![Calculation Results](docs/images/8_calculations_results.png) | The app automatically calculates totals for each person based on consumption. |
+| 8️⃣ Save Locally | ![Save Locally](docs/images/2select_ticket_example2.png) | All tickets (with edits and calculations) are stored securely on the device. Users can reopen them anytime, even offline. |
 
----
 
-### 2️⃣ View Ticket Information
-After OCR, users see the extracted ticket information in a clean table view.
-
-![View Ticket Info](docs/images/3_view_ticket_info.png)
-
----
-
-### 3️⃣ Edit & Modify Ticket
-Users can correct misread items, add missing prices, or update other ticket details.
-
-![Modify Ticket Info](docs/images/4_modify_ticket_info.png)
-
----
-
-### 4️⃣ Choose People Who Consumed Items
-Assign each item on the ticket to the friends who consumed it.
-
-![Choose People](docs/images/5_choose_names_of_people_who_consumed_somthing.png)
-
----
-
-### 5️⃣ Choose Payer of the Bill
-Select which friend paid the bill or split payment.
-
-![Choose Payer](docs/images/6_choose_payer_of_the_bill.png)
-
----
-
-### 6️⃣ Assign Items to Each Person
-Determine who consumed which items to calculate individual totals.
-
-![Assign Items](docs/images/7_choose_which_items_every_person_consumed.png)
-
----
-
-### 7️⃣ Calculation Results
-The app automatically calculates totals for each person based on consumption.
-
-![Calculation Results](docs/images/8_calculations_results.png)
-
----
-
-### 8️⃣ Save Locally
-All tickets (with edits and calculations) are stored securely on the device. Users can reopen them anytime, even offline.
-
-![Saved Tickets Example](docs/images/2select_ticket_example2.png)
 
 
 ## 📦 Dependencies
