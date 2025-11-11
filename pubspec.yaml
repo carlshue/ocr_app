@@ -30,15 +30,25 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.13.6
-  image_picker: ^1.0.0
-  image: ^4.0.17  # O la versión actual
-  path_provider: ^2.0.15  # O la versión más reciente
+  http: ^1.4.0
+  image_picker: ^1.1.2
+  image: ^4.5.4
+  path_provider: ^2.1.5
+  google_mlkit_text_recognition: ^0.15.0 
+  shared_preferences: ^2.5.3
+  provider: ^6.1.5
+  webview_flutter: ^4.13.0
+  uuid: ^4.4.2
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/dolorosApp_icon.png"  # La ruta a tu nuevo icono
 
 
   # The following adds the Cupertino Icons font to your application.
